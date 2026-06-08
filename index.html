@@ -277,7 +277,7 @@
     <h2>Room Booking</h2>
     <p>Sign in with your TripJack Google account to check room availability and make bookings.</p>
     <div id="g_id_onload"
-      data-client_id="730132317756-clg8e41cr3irtivl9vacuedhnjmql3uk.apps.googleusercontent.com"
+      data-client_id="YOUR_GOOGLE_CLIENT_ID"
       data-callback="handleCredential"
       data-auto_prompt="false">
     </div>
@@ -327,7 +327,7 @@
     <h3>Book <span id="modal-room-name"></span></h3>
     <div class="form-row">
       <label>Date</label>
-      <input type="date" id="modal-date" readonly />
+      <input type="date" id="modal-date" />
     </div>
     <div class="form-row time-row">
       <div>
@@ -617,6 +617,14 @@ $('modal-overlay').addEventListener('click', e => {
   if (e.target === $('modal-overlay')) closeModal();
 });
 
+// GAS does not support JSON POST from browser (CORS preflight is blocked).
+// All writes are sent as GET requests with query parameters instead.
+async function gasGet(params) {
+  const qs = new URLSearchParams(params).toString();
+  const r = await fetch(`${GAS_URL}?${qs}`, { redirect: 'follow' });
+  return r.json();
+}
+
 async function submitBooking() {
   const date      = $('modal-date').value;
   const startTime = $('modal-start').value;
@@ -629,18 +637,13 @@ async function submitBooking() {
   showLoading(true);
   closeModal();
   try {
-    const r = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'book',
-        roomName: modalRoom,
-        date, startTime, endTime, purpose,
-        bookedBy:   currentUser.email,
-        bookedByName: currentUser.name,
-      }),
+    const data = await gasGet({
+      action:      'book',
+      roomName:    modalRoom,
+      date, startTime, endTime, purpose,
+      bookedBy:    currentUser.email,
+      bookedByName: currentUser.name,
     });
-    const data = await r.json();
     if (data.ok) {
       toast(`Booked! ${modalRoom} ${formatTime(startTime)}–${formatTime(endTime)}`, 'success');
       await loadDay(date);
@@ -648,7 +651,7 @@ async function submitBooking() {
       toast(data.error || 'Booking failed.', 'error');
     }
   } catch(e) {
-    toast('Network error. Please try again.', 'error');
+    toast('Booking failed: ' + e.message, 'error');
   }
   showLoading(false);
 }
@@ -657,12 +660,9 @@ async function cancelBooking(bookingId, roomName) {
   if (!confirm(`Cancel this booking for ${roomName}?`)) return;
   showLoading(true);
   try {
-    const r = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'cancel', bookingId, requestedBy: currentUser.email }),
+    const data = await gasGet({
+      action: 'cancel', bookingId, requestedBy: currentUser.email
     });
-    const data = await r.json();
     if (data.ok) {
       toast('Booking cancelled.', 'success');
       await loadDay($('date-picker').value);
@@ -670,7 +670,7 @@ async function cancelBooking(bookingId, roomName) {
       toast(data.error || 'Could not cancel.', 'error');
     }
   } catch(e) {
-    toast('Network error.', 'error');
+    toast('Cancel failed: ' + e.message, 'error');
   }
   showLoading(false);
 }
