@@ -451,13 +451,8 @@ async function onSignedIn() {
   showLoading(false);
 
   $('auth-screen').style.display = 'none';
-  if (!canBook) {
-    $('denied-screen').style.display = 'flex';
-    // Still show the app in read-only if you want everyone to VIEW
-    // Comment the line below to allow all @tripjack.com to at least view
-    return;
-  }
-
+  // All @tripjack.com users can view the room grid.
+  // canBook controls whether booking buttons appear.
   showApp();
 }
 
@@ -477,14 +472,9 @@ function showApp() {
   goToday();
 }
 
-function todayISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-
 function goToday() {
-  const iso = todayISO();
-  $('date-picker').min   = iso;
+  const d = new Date();
+  const iso = d.toISOString().split('T')[0];
   $('date-picker').value = iso;
   loadDay(iso);
 }
@@ -607,7 +597,6 @@ let modalRoom = '';
 function openModal(roomName) {
   modalRoom = roomName;
   $('modal-room-name').textContent = roomName;
-  $('modal-date').min   = todayISO();
   $('modal-date').value = $('date-picker').value;
   $('modal-start').value = '09:00';
   $('modal-end').value   = '10:00';
@@ -638,12 +627,41 @@ async function submitBooking() {
   const purpose   = $('modal-purpose').value.trim();
 
   if (!startTime || !endTime) { toast('Please set start and end times.', 'error'); return; }
-  if (date < todayISO()) { toast('Cannot book a room for a past date.', 'error'); return; }
   if (toMinutes(endTime) <= toMinutes(startTime)) { toast('End time must be after start time.', 'error'); return; }
 
   showLoading(true);
   closeModal();
+
   try {
+    // ── Step 1: Fetch freshest bookings for this room+date before submitting
+    //    Guards against race conditions where two users book simultaneously
+    let freshBookings = [];
+    try {
+      const fr = await fetch(`${GAS_URL}?action=bookings&date=${date}`);
+      const fd = await fr.json();
+      freshBookings = (fd.ok ? fd.data : bookingsCache)
+        .filter(b => b.roomName === modalRoom && !b.cancelled);
+    } catch(_) {
+      freshBookings = bookingsCache.filter(b => b.roomName === modalRoom && !b.cancelled);
+    }
+
+    // ── Step 2: Client-side overlap check on fresh data
+    const newStart = toMinutes(startTime);
+    const newEnd   = toMinutes(endTime);
+    const conflict = freshBookings.find(b => {
+      const bStart = toMinutes(b.startTime);
+      const bEnd   = toMinutes(b.endTime);
+      return newStart < bEnd && newEnd > bStart;
+    });
+    if (conflict) {
+      const who = conflict.bookedByName || conflict.bookedBy.split('@')[0];
+      toast(`Slot taken: ${modalRoom} already booked ${formatTime(conflict.startTime)}–${formatTime(conflict.endTime)} by ${who}`, 'error');
+      await loadDay(date); // refresh grid so the conflict is visible
+      showLoading(false);
+      return;
+    }
+
+    // ── Step 3: Send to GAS (server also re-checks for safety)
     const data = await gasGet({
       action:      'book',
       roomName:    modalRoom,
@@ -656,6 +674,7 @@ async function submitBooking() {
       await loadDay(date);
     } else {
       toast(data.error || 'Booking failed.', 'error');
+      await loadDay(date); // refresh regardless so UI reflects true state
     }
   } catch(e) {
     toast('Booking failed: ' + e.message, 'error');
