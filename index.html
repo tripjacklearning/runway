@@ -4,22 +4,18 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TripJack · Room Booking</title>
-
-<!-- Google Sign-In -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
-  /* ── Design tokens ──────────────────────────────────────── */
   :root {
     --bg:        #F5F4F0;
     --surface:   #FFFFFF;
     --border:    #E2E0D9;
     --text:      #1A1916;
     --muted:     #7A7870;
-    --accent:    #1D3C6E;      /* TripJack navy */
-    --accent2:   #E8762B;      /* warm orange */
+    --accent:    #1D3C6E;
+    --accent2:   #E8762B;
     --danger:    #C0392B;
     --free:      #D4EDDA;
     --free-text: #155724;
@@ -30,35 +26,19 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-  }
-
-  /* ── Top bar ────────────────────────────────────────────── */
+  /* ── Header ─────────────────────────────────────── */
   header {
-    background: var(--accent);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; height: 56px;
+    position: sticky; top: 0; z-index: 100;
     box-shadow: 0 2px 8px rgba(0,0,0,.18);
   }
   .logo { font-size: 15px; font-weight: 600; letter-spacing: .4px; display: flex; align-items: center; gap: 10px; }
   .logo svg { opacity: .85; }
-  .user-pill {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; opacity: .88;
-  }
+  .user-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; opacity: .88; }
   .user-pill img { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,.3); }
   #btn-signout {
     background: rgba(255,255,255,.15); border: none; color: #fff;
@@ -67,28 +47,21 @@
   }
   #btn-signout:hover { background: rgba(255,255,255,.25); }
 
-  /* ── Auth screen ────────────────────────────────────────── */
-  #auth-screen {
-    display: flex; align-items: center; justify-content: center;
-    min-height: calc(100vh - 56px);
-  }
+  /* ── Auth screen ─────────────────────────────────── */
+  #auth-screen { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 56px); }
   .auth-card {
-    background: var(--surface); border-radius: 16px;
-    box-shadow: var(--shadow); padding: 48px 56px; text-align: center;
-    max-width: 380px; width: 90%;
+    background: var(--surface); border-radius: 16px; box-shadow: var(--shadow);
+    padding: 48px 56px; text-align: center; max-width: 380px; width: 90%;
   }
   .auth-card h2 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
   .auth-card p  { color: var(--muted); margin-bottom: 28px; font-size: 13px; line-height: 1.6; }
   .auth-note { font-size: 11px; color: var(--muted); margin-top: 20px; }
 
-  /* ── Main layout ────────────────────────────────────────── */
+  /* ── Main app ────────────────────────────────────── */
   #app { display: none; max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
 
-  /* ── Date picker bar ───────────────────────────────────── */
-  .date-bar {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 24px; flex-wrap: wrap;
-  }
+  /* ── Date bar ────────────────────────────────────── */
+  .date-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
   .date-bar label { font-size: 13px; font-weight: 500; color: var(--muted); }
   .date-bar input[type=date] {
     border: 1.5px solid var(--border); border-radius: var(--radius);
@@ -111,27 +84,18 @@
   }
   .floor-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* ── Room grid ──────────────────────────────────────────── */
+  /* ── Room grid ───────────────────────────────────── */
   .section-title {
     font-size: 11px; font-weight: 600; letter-spacing: 1.2px;
     text-transform: uppercase; color: var(--muted); margin: 20px 0 10px;
   }
-  .room-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 14px;
-  }
+  .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
   .room-card {
     background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: 12px; overflow: hidden;
-    transition: box-shadow .15s, transform .1s;
+    border-radius: 12px; overflow: hidden; transition: box-shadow .15s, transform .1s;
   }
   .room-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
-
-  .room-header {
-    padding: 14px 16px 10px;
-    display: flex; align-items: flex-start; justify-content: space-between;
-  }
+  .room-header { padding: 14px 16px 10px; display: flex; align-items: flex-start; justify-content: space-between; }
   .room-name { font-size: 15px; font-weight: 600; }
   .room-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
   .cap-badge {
@@ -140,51 +104,40 @@
     padding: 2px 8px; border-radius: 20px; white-space: nowrap;
   }
 
-  /* Timeline */
-  .timeline {
-    padding: 0 16px 14px;
-  }
+  /* ── Timeline ────────────────────────────────────── */
+  .timeline { padding: 0 16px 14px; }
   .tl-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .tl-track {
-    position: relative; height: 22px; background: var(--free);
-    border-radius: 4px; overflow: visible;
-  }
-  .tl-block {
-    position: absolute; top: 0; height: 100%;
-    background: var(--accent); border-radius: 3px;
-    transition: opacity .1s; cursor: default;
-  }
+  .tl-track { position: relative; height: 22px; background: var(--free); border-radius: 4px; overflow: visible; }
+  .tl-block { position: absolute; top: 0; height: 100%; background: var(--accent); border-radius: 3px; transition: opacity .1s; cursor: default; }
   .tl-block:hover { opacity: .8; }
   .tl-block.mine { background: var(--accent2); }
 
+  /* ── Slot list ───────────────────────────────────── */
   .slots-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
   .slot-row {
     display: flex; align-items: center; justify-content: space-between;
-    font-size: 12px; padding: 5px 0;
-    border-bottom: 1px solid var(--border);
+    font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--border);
   }
   .slot-row:last-child { border: none; }
-  .slot-time { font-family: 'DM Mono', monospace; color: var(--text); font-size: 11px; }
-  .slot-who  { color: var(--muted); font-size: 11px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .slot-time { font-family: 'DM Mono', monospace; color: var(--text); font-size: 11px; flex-shrink: 0; }
+  .slot-who  { color: var(--muted); font-size: 11px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0 6px; }
   .btn-cancel {
     font-size: 10px; padding: 2px 8px; border-radius: 4px; cursor: pointer;
-    background: var(--busy); color: var(--busy-text); border: none; font-family: inherit;
+    background: var(--busy); color: var(--busy-text); border: none; font-family: inherit; flex-shrink: 0;
   }
   .btn-cancel:hover { opacity: .75; }
-
   .no-bookings { font-size: 12px; color: var(--free-text); background: var(--free); padding: 6px 10px; border-radius: 6px; text-align: center; }
 
-  /* Book button */
+  /* ── Book button ─────────────────────────────────── */
   .btn-book {
-    width: 100%; margin: 10px 16px 14px; width: calc(100% - 32px);
+    display: block; margin: 10px 16px 14px; width: calc(100% - 32px);
     background: var(--accent); color: #fff; border: none;
     border-radius: 8px; padding: 9px; font-family: inherit; font-size: 13px;
     font-weight: 500; cursor: pointer; transition: background .15s;
   }
   .btn-book:hover { background: #162e57; }
-  .btn-book:disabled { background: var(--border); color: var(--muted); cursor: default; }
 
-  /* ── Modal ──────────────────────────────────────────────── */
+  /* ── Modal ───────────────────────────────────────── */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,.35); z-index: 200;
@@ -193,7 +146,7 @@
   .modal-overlay.open { display: flex; }
   .modal {
     background: var(--surface); border-radius: 14px;
-    padding: 28px 28px 22px; width: 400px; max-width: 95vw;
+    padding: 28px 28px 22px; width: 420px; max-width: 95vw;
     box-shadow: 0 8px 32px rgba(0,0,0,.18);
     animation: slideUp .2s ease;
   }
@@ -202,6 +155,8 @@
   .modal h3 span { color: var(--accent); }
   .form-row { margin-bottom: 14px; }
   .form-row label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 5px; }
+  .form-hint { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .form-hint.warn { color: var(--danger); }
   .form-row input, .form-row select, .form-row textarea {
     width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
     padding: 9px 11px; font-family: inherit; font-size: 14px; color: var(--text);
@@ -222,41 +177,28 @@
     flex: 1; background: var(--bg); color: var(--text); border: 1.5px solid var(--border);
     border-radius: 8px; padding: 10px; font-family: inherit; font-size: 14px; cursor: pointer;
   }
+
+  /* ── Toast ───────────────────────────────────────── */
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     background: var(--text); color: #fff; padding: 10px 20px;
-    border-radius: 8px; font-size: 13px; z-index: 500;
+    border-radius: 8px; font-size: 13px; z-index: 500; max-width: 90vw; text-align: center;
     opacity: 0; pointer-events: none; transition: opacity .2s;
   }
-  .toast.show { opacity: 1; }
+  .toast.show  { opacity: 1; }
   .toast.error { background: var(--danger); }
   .toast.success { background: #1a7a3a; }
 
-  /* ── Access denied ──────────────────────────────────────── */
-  #denied-screen {
-    display: none; align-items: center; justify-content: center;
-    min-height: calc(100vh - 56px);
-  }
-  .denied-card {
-    background: var(--surface); border-radius: 14px; box-shadow: var(--shadow);
-    padding: 40px; text-align: center; max-width: 380px;
-  }
-  .denied-card h2 { font-size: 20px; margin-bottom: 10px; }
-  .denied-card p  { color: var(--muted); font-size: 13px; line-height: 1.6; }
-
-  /* ── Loading ────────────────────────────────────────────── */
+  /* ── Loading ─────────────────────────────────────── */
   .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid #ccc; border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  #loading-overlay {
-    position: fixed; inset: 0; background: rgba(245,244,240,.7);
-    display: none; align-items: center; justify-content: center; z-index: 300;
-  }
+  #loading-overlay { position: fixed; inset: 0; background: rgba(245,244,240,.7); display: none; align-items: center; justify-content: center; z-index: 300; }
   #loading-overlay.show { display: flex; }
 </style>
 </head>
 <body>
 
-<!-- ─ Header ─────────────────────────────────────────────── -->
+<!-- Header -->
 <header>
   <div class="logo">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -271,57 +213,40 @@
   </div>
 </header>
 
-<!-- ─ Auth screen ─────────────────────────────────────────── -->
+<!-- Auth screen -->
 <div id="auth-screen">
   <div class="auth-card">
     <h2>Room Booking</h2>
-    <p>Sign in with your TripJack Google account to check room availability and make bookings.</p>
+    <p>Sign in with your TripJack Google account to check availability and make bookings.</p>
     <div id="g_id_onload"
       data-client_id="730132317756-clg8e41cr3irtivl9vacuedhnjmql3uk.apps.googleusercontent.com"
       data-callback="handleCredential"
       data-auto_prompt="false">
     </div>
     <div class="g_id_signin"
-      data-type="standard"
-      data-size="large"
-      data-theme="outline"
-      data-text="signin_with"
-      data-shape="rectangular"
-      data-logo_alignment="left">
+      data-type="standard" data-size="large" data-theme="outline"
+      data-text="signin_with" data-shape="rectangular" data-logo_alignment="left">
     </div>
     <p class="auth-note">Only @tripjack.com accounts are permitted.</p>
   </div>
 </div>
 
-<!-- ─ Denied screen ───────────────────────────────────────── -->
-<div id="denied-screen">
-  <div class="denied-card">
-    <h2>Access Restricted</h2>
-    <p id="denied-msg">Bookings are currently restricted. Please contact the receptionist to make a booking.</p>
-    <br/>
-    <button class="btn-secondary" onclick="signOut()" style="width:100%;border-radius:8px;padding:10px;font-family:inherit;cursor:pointer;">Sign out</button>
-  </div>
-</div>
-
-<!-- ─ Main app ─────────────────────────────────────────────── -->
+<!-- Main app -->
 <div id="app">
-
-  <!-- Date bar -->
   <div class="date-bar">
     <label>Viewing date</label>
     <input type="date" id="date-picker" />
     <button class="btn-today" onclick="goToday()">Today</button>
     <div class="floor-toggle">
-      <button class="floor-btn active" data-floor="all" onclick="setFloor(this)">All floors</button>
-      <button class="floor-btn" data-floor="Ground" onclick="setFloor(this)">Ground</button>
-      <button class="floor-btn" data-floor="First" onclick="setFloor(this)">First</button>
+      <button class="floor-btn active" data-floor="all"    onclick="setFloor(this)">All floors</button>
+      <button class="floor-btn"        data-floor="Ground" onclick="setFloor(this)">Ground</button>
+      <button class="floor-btn"        data-floor="First"  onclick="setFloor(this)">First</button>
     </div>
   </div>
-
   <div id="rooms-container"></div>
 </div>
 
-<!-- ─ Booking modal ───────────────────────────────────────── -->
+<!-- Booking modal -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <h3>Book <span id="modal-room-name"></span></h3>
@@ -343,49 +268,55 @@
       <label>Purpose / Meeting name</label>
       <input type="text" id="modal-purpose" placeholder="e.g. Team standup, Client call…" />
     </div>
+    <div class="form-row">
+      <label>Number of attendees</label>
+      <input type="number" id="modal-headcount" min="1" placeholder="How many people?" />
+      <small class="form-hint" id="modal-capacity-hint"></small>
+    </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" onclick="submitBooking()">Confirm Booking</button>
+      <button class="btn-primary"   onclick="submitBooking()">Confirm Booking</button>
     </div>
   </div>
 </div>
 
-<!-- ─ Loading overlay ─────────────────────────────────────── -->
+<!-- Loading overlay -->
 <div id="loading-overlay"><div class="spinner"></div></div>
 
-<!-- ─ Toast ───────────────────────────────────────────────── -->
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ╔══════════════════════════════════════════════════════════╗
-// ║  CONFIG — update these two lines                        ║
-// ╚══════════════════════════════════════════════════════════╝
-const GAS_URL    = "https://script.google.com/macros/s/AKfycbw20AlQYUOaikWj0_XEDvCHrZ_dZzUNel-0rVtVmZJvk-IrCFe5efYAt-0sWfi_NwRH/exec"; // paste after deploying Code.gs
-const CLIENT_ID  = "730132317756-clg8e41cr3irtivl9vacuedhnjmql3uk.apps.googleusercontent.com";        // from Google Cloud Console
+// ── CONFIG ───────────────────────────────────────────────────
+const GAS_URL   = "https://script.google.com/macros/s/AKfycbw20AlQYUOaikWj0_XEDvCHrZ_dZzUNel-0rVtVmZJvk-IrCFe5efYAt-0sWfi_NwRH/exec";
+const CLIENT_ID = "730132317756-clg8e41cr3irtivl9vacuedhnjmql3uk.apps.googleusercontent.com";
 
-// ── Room master (mirrors Code.gs) ──────────────────────────
+// ── Room master (must mirror Code.gs) ───────────────────────
 const ROOMS = [
-  { name: "Terminal 1", floor: "Ground", capacity: 4 },
-  { name: "Terminal 2", floor: "Ground", capacity: 4 },
+  { name: "Terminal 1", floor: "Ground", capacity: 4  },
+  { name: "Terminal 2", floor: "Ground", capacity: 4  },
   { name: "Terminal 3", floor: "Ground", capacity: 10 },
   { name: "London",     floor: "First",  capacity: 16 },
-  { name: "C5",         floor: "First",  capacity: 5 },
-  { name: "C6",         floor: "First",  capacity: 5 },
-  { name: "C7",         floor: "First",  capacity: 4 },
-  { name: "C8",         floor: "First",  capacity: 4 },
-  { name: "C9",         floor: "First",  capacity: 4 },
-  { name: "C10",        floor: "First",  capacity: 4 },
+  { name: "C5",         floor: "First",  capacity: 5  },
+  { name: "C6",         floor: "First",  capacity: 5  },
+  { name: "C7",         floor: "First",  capacity: 4  },
+  { name: "C8",         floor: "First",  capacity: 4  },
+  { name: "C9",         floor: "First",  capacity: 4  },
+  { name: "C10",        floor: "First",  capacity: 4  },
 ];
 
-// ── State ───────────────────────────────────────────────────
-let currentUser   = null;   // { email, name, picture }
-let canBook       = false;
-let activeFloor   = "all";
-let bookingsCache = [];     // for selected date
+// ── State ────────────────────────────────────────────────────
+let currentUser    = null;   // { email, name, picture }
+let canBook        = false;
+let activeFloor    = "all";
+let bookingsCache  = [];
+let modalRoom      = "";
+let modalCapacity  = 0;
 
-// ── Helpers ─────────────────────────────────────────────────
+// ── DOM helper ───────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
+// ── UI helpers ───────────────────────────────────────────────
 function showLoading(v) { $('loading-overlay').classList.toggle('show', v); }
 
 function toast(msg, type = '') {
@@ -393,27 +324,45 @@ function toast(msg, type = '') {
   el.textContent = msg;
   el.className = 'toast show' + (type ? ' ' + type : '');
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+  el._t = setTimeout(() => el.classList.remove('show'), 4000);
 }
 
+// ── Time helpers ─────────────────────────────────────────────
 function toMinutes(t) {
-  const [h, m] = t.split(':').map(Number);
+  if (!t) return -1;
+  const parts = String(t).split(':');
+  if (parts.length < 2) return -1;
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  if (isNaN(h) || isNaN(m)) return -1;
   return h * 60 + m;
 }
 
 function formatTime(t) {
-  const [h, m] = t.split(':').map(Number);
+  if (!t) return '';
+  const parts = String(t).split(':');
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1] || '0', 10);
+  if (isNaN(h)) return t;
   const ampm = h >= 12 ? 'PM' : 'AM';
-  return `${h % 12 || 12}:${m.toString().padStart(2,'0')} ${ampm}`;
+  return (h % 12 || 12) + ':' + String(m).padStart(2, '0') + ' ' + ampm;
 }
 
-// Timeline: office 8 AM–10 PM = 840 min window starting at 480
-const TL_START = 8 * 60;   // 480
-const TL_END   = 22 * 60;  // 1320
+// Returns a local YYYY-MM-DD string without UTC shift
+function localDateStr(d) {
+  return d.getFullYear() + '-'
+    + String(d.getMonth() + 1).padStart(2, '0') + '-'
+    + String(d.getDate()).padStart(2, '0');
+}
+
+// Timeline: 8 AM – 10 PM
+const TL_START = 8  * 60;
+const TL_END   = 22 * 60;
 const TL_RANGE = TL_END - TL_START;
 
 function slotToPercent(t) {
   const m = toMinutes(t);
+  if (m === -1) return 0;
   return Math.max(0, Math.min(100, ((m - TL_START) / TL_RANGE) * 100));
 }
 
@@ -421,7 +370,7 @@ function slotToPercent(t) {
 function handleCredential(response) {
   const payload = parseJwt(response.credential);
   if (!payload.email.endsWith('@tripjack.com')) {
-    toast('Only @tripjack.com accounts allowed.', 'error');
+    toast('Only @tripjack.com accounts are allowed.', 'error');
     return;
   }
   currentUser = { email: payload.email, name: payload.name, picture: payload.picture };
@@ -429,52 +378,44 @@ function handleCredential(response) {
 }
 
 function parseJwt(token) {
-  const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
   return JSON.parse(atob(b64));
 }
 
 async function onSignedIn() {
-  // Show user pill
   $('user-pill').style.display = 'flex';
   $('user-name').textContent = currentUser.name.split(' ')[0];
   $('user-avatar').src = currentUser.picture;
 
   showLoading(true);
   try {
-    const r = await fetch(`${GAS_URL}?action=checkAccess&email=${encodeURIComponent(currentUser.email)}`);
+    const r    = await fetch(GAS_URL + '?action=checkAccess&email=' + encodeURIComponent(currentUser.email));
     const data = await r.json();
     canBook = data.data?.allowed || false;
-  } catch(e) {
-    // If GAS_URL not set yet, default to view-only
+  } catch(_) {
     canBook = false;
   }
   showLoading(false);
 
   $('auth-screen').style.display = 'none';
-  // All @tripjack.com users can view the room grid.
-  // canBook controls whether booking buttons appear.
-  showApp();
+  // All @tripjack.com users see the grid; canBook gates the Book button only
+  $('app').style.display = 'block';
+  goToday();
 }
 
 function signOut() {
   currentUser = null; canBook = false;
-  $('user-pill').style.display = 'none';
-  $('app').style.display = 'none';
-  $('denied-screen').style.display = 'none';
+  $('user-pill').style.display  = 'none';
+  $('app').style.display        = 'none';
   $('auth-screen').style.display = 'flex';
   google.accounts.id.disableAutoSelect();
 }
 $('btn-signout').onclick = signOut;
 
-// ── App init ─────────────────────────────────────────────────
-function showApp() {
-  $('app').style.display = 'block';
-  goToday();
-}
-
+// ── Date navigation ──────────────────────────────────────────
 function goToday() {
-  const d = new Date();
-  const iso = d.toISOString().split('T')[0];
+  // Use local date — toISOString() is UTC and shifts day for IST users
+  const iso = localDateStr(new Date());
   $('date-picker').value = iso;
   loadDay(iso);
 }
@@ -488,13 +429,15 @@ function setFloor(btn) {
   renderRooms();
 }
 
+// ── Data loading ─────────────────────────────────────────────
 async function loadDay(date) {
+  if (!date) return;
   showLoading(true);
   try {
-    const r = await fetch(`${GAS_URL}?action=bookings&date=${date}`);
+    const r    = await fetch(GAS_URL + '?action=bookings&date=' + encodeURIComponent(date));
     const data = await r.json();
     bookingsCache = data.ok ? data.data : [];
-  } catch(e) {
+  } catch(_) {
     bookingsCache = [];
   }
   showLoading(false);
@@ -505,16 +448,13 @@ async function loadDay(date) {
 function renderRooms() {
   const container = $('rooms-container');
   container.innerHTML = '';
-
-  const floors = ['Ground', 'First'];
-  floors.forEach(floor => {
+  ['Ground', 'First'].forEach(floor => {
     if (activeFloor !== 'all' && activeFloor !== floor) return;
-
     const rooms = ROOMS.filter(r => r.floor === floor);
-    const section = document.createElement('div');
-    section.innerHTML = `<div class="section-title">${floor} Floor</div><div class="room-grid" id="grid-${floor}"></div>`;
-    container.appendChild(section);
-    const grid = section.querySelector('.room-grid');
+    const wrap  = document.createElement('div');
+    wrap.innerHTML = `<div class="section-title">${floor} Floor</div><div class="room-grid" id="grid-${floor}"></div>`;
+    container.appendChild(wrap);
+    const grid = wrap.querySelector('.room-grid');
     rooms.forEach(room => grid.appendChild(buildRoomCard(room)));
   });
 }
@@ -527,64 +467,83 @@ function buildRoomCard(room) {
   // Header
   const header = document.createElement('div');
   header.className = 'room-header';
-  header.innerHTML = `
-    <div>
-      <div class="room-name">${room.name}</div>
-      <div class="room-meta">${room.floor} Floor</div>
-    </div>
-    <span class="cap-badge">👥 ${room.capacity}</span>
-  `;
+  header.innerHTML =
+    '<div>' +
+      '<div class="room-name">' + room.name + '</div>' +
+      '<div class="room-meta">' + room.floor + ' Floor</div>' +
+    '</div>' +
+    '<span class="cap-badge">👥 ' + room.capacity + '</span>';
   card.appendChild(header);
 
-  // Timeline track
+  // Timeline
   const tl = document.createElement('div');
   tl.className = 'timeline';
-  tl.innerHTML = `
-    <div class="tl-label"><span>8 AM</span><span>1 PM</span><span>10 PM</span></div>
-    <div class="tl-track" id="track-${room.name.replace(/\s/g,'-')}"></div>
-  `;
+  tl.innerHTML =
+    '<div class="tl-label"><span>8 AM</span><span>1 PM</span><span>10 PM</span></div>' +
+    '<div class="tl-track" id="track-' + room.name.replace(/\s/g, '-') + '"></div>';
   card.appendChild(tl);
   const track = tl.querySelector('.tl-track');
-
   bookings.forEach(b => {
     const left  = slotToPercent(b.startTime);
     const right = slotToPercent(b.endTime);
+    if (right <= left) return; // skip corrupt rows silently
     const block = document.createElement('div');
     block.className = 'tl-block' + (b.bookedBy === currentUser?.email ? ' mine' : '');
-    block.style.left  = left + '%';
+    block.style.left  = left  + '%';
     block.style.width = (right - left) + '%';
-    block.title = `${formatTime(b.startTime)}–${formatTime(b.endTime)}: ${b.purpose || b.bookedByName}`;
+    block.title = formatTime(b.startTime) + '–' + formatTime(b.endTime) + ': ' + (b.purpose || b.bookedByName);
     track.appendChild(block);
   });
 
-  // Booking list
+  // Slot list (visible to everyone)
+  const listWrap = document.createElement('div');
+  listWrap.style.padding = '0 16px';
   const list = document.createElement('div');
   list.className = 'slots-list';
-  list.style.padding = '0 16px';
-
   if (bookings.length === 0) {
     list.innerHTML = '<div class="no-bookings">Free all day</div>';
   } else {
-    bookings.sort((a,b) => a.startTime.localeCompare(b.startTime)).forEach(b => {
-      const row = document.createElement('div');
-      row.className = 'slot-row';
-      const isMine = b.bookedBy === currentUser?.email;
-      row.innerHTML = `
-        <span class="slot-time">${formatTime(b.startTime)}–${formatTime(b.endTime)}</span>
-        <span class="slot-who" title="${b.bookedByName || b.bookedBy}">${b.purpose || (b.bookedByName || b.bookedBy.split('@')[0])}</span>
-        ${(isMine || canBook) ? `<button class="btn-cancel" onclick="cancelBooking('${b.bookingId}','${room.name}')">Cancel</button>` : ''}
-      `;
-      list.appendChild(row);
-    });
-  }
-  card.appendChild(list);
+    bookings
+      .slice()
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+      .forEach(b => {
+        const isMine = currentUser && b.bookedBy === currentUser.email;
+        const row    = document.createElement('div');
+        row.className = 'slot-row';
 
-  // Book button
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'slot-time';
+        timeSpan.textContent = formatTime(b.startTime) + '–' + formatTime(b.endTime);
+
+        const whoSpan = document.createElement('span');
+        whoSpan.className = 'slot-who';
+        const label = b.purpose || b.bookedByName || b.bookedBy.split('@')[0];
+        whoSpan.textContent = label + (b.headcount ? ' · 👥' + b.headcount : '');
+        whoSpan.title = b.bookedByName || b.bookedBy;
+
+        row.appendChild(timeSpan);
+        row.appendChild(whoSpan);
+
+        // Cancel button: show to booking owner OR any authorised booker (admin)
+        if (isMine || canBook) {
+          const btn = document.createElement('button');
+          btn.className   = 'btn-cancel';
+          btn.textContent = 'Cancel';
+          btn.onclick     = () => doCancelBooking(b.bookingId, room.name);
+          row.appendChild(btn);
+        }
+        list.appendChild(row);
+      });
+  }
+  listWrap.appendChild(list);
+  card.appendChild(listWrap);
+
+  // Book button — only for authorised users
   if (canBook) {
     const btn = document.createElement('button');
-    btn.className = 'btn-book';
+    btn.className   = 'btn-book';
     btn.textContent = '+ Book this room';
-    btn.onclick = () => openModal(room.name);
+    btn.onclick     = () => openModal(room.name, room.capacity);
     card.appendChild(btn);
   }
 
@@ -592,15 +551,18 @@ function buildRoomCard(room) {
 }
 
 // ── Modal ─────────────────────────────────────────────────────
-let modalRoom = '';
-
-function openModal(roomName) {
-  modalRoom = roomName;
-  $('modal-room-name').textContent = roomName;
-  $('modal-date').value = $('date-picker').value;
-  $('modal-start').value = '09:00';
-  $('modal-end').value   = '10:00';
-  $('modal-purpose').value = '';
+function openModal(roomName, capacity) {
+  modalRoom     = roomName;
+  modalCapacity = capacity || 99;
+  $('modal-room-name').textContent    = roomName;
+  $('modal-date').value               = $('date-picker').value;
+  $('modal-start').value              = '09:00';
+  $('modal-end').value                = '10:00';
+  $('modal-purpose').value            = '';
+  $('modal-headcount').value          = '';
+  $('modal-headcount').max            = String(capacity || 99);
+  $('modal-capacity-hint').textContent = 'Room capacity: ' + (capacity || '?') + ' people';
+  $('modal-capacity-hint').className  = 'form-hint';
   $('modal-overlay').classList.add('open');
 }
 
@@ -608,95 +570,150 @@ function closeModal() {
   $('modal-overlay').classList.remove('open');
 }
 
+// Close modal on backdrop click
 $('modal-overlay').addEventListener('click', e => {
   if (e.target === $('modal-overlay')) closeModal();
 });
 
-// GAS does not support JSON POST from browser (CORS preflight is blocked).
-// All writes are sent as GET requests with query parameters instead.
+// Auto-correct end time when start time changes
+$('modal-start').addEventListener('change', function() {
+  const startMins = toMinutes(this.value);
+  if (startMins === -1) return;
+  const endMins = toMinutes($('modal-end').value);
+  // If end is not set, or end <= start, bump end to start + 1 hour (cap at 22:00)
+  if (endMins === -1 || endMins <= startMins) {
+    const newEnd = Math.min(startMins + 60, 22 * 60);
+    $('modal-end').value =
+      String(Math.floor(newEnd / 60)).padStart(2, '0') + ':' +
+      String(newEnd % 60).padStart(2, '0');
+  }
+});
+
+// Live capacity warning on headcount input
+$('modal-headcount').addEventListener('input', function() {
+  const v    = parseInt(this.value, 10);
+  const hint = $('modal-capacity-hint');
+  if (!isNaN(v) && v > modalCapacity) {
+    hint.textContent = '⚠ Exceeds capacity (' + modalCapacity + '). Choose a larger room.';
+    hint.className = 'form-hint warn';
+  } else {
+    hint.textContent = 'Room capacity: ' + modalCapacity + ' people';
+    hint.className = 'form-hint';
+  }
+});
+
+// ── GAS GET helper ────────────────────────────────────────────
 async function gasGet(params) {
   const qs = new URLSearchParams(params).toString();
-  const r = await fetch(`${GAS_URL}?${qs}`, { redirect: 'follow' });
+  const r  = await fetch(GAS_URL + '?' + qs, { redirect: 'follow' });
   return r.json();
 }
 
+// ── Submit booking ────────────────────────────────────────────
 async function submitBooking() {
   const date      = $('modal-date').value;
   const startTime = $('modal-start').value;
   const endTime   = $('modal-end').value;
   const purpose   = $('modal-purpose').value.trim();
+  const hcRaw     = $('modal-headcount').value.trim();
+  const headcount = hcRaw !== '' ? parseInt(hcRaw, 10) : null;
 
-  if (!startTime || !endTime) { toast('Please set start and end times.', 'error'); return; }
-  if (toMinutes(endTime) <= toMinutes(startTime)) { toast('End time must be after start time.', 'error'); return; }
+  // ── Client-side validation (same rules as backend — belt and braces)
+  if (!date) {
+    toast('Please select a date.', 'error'); return;
+  }
+  if (!startTime) {
+    toast('Please set a start time.', 'error'); return;
+  }
+  if (!endTime) {
+    toast('Please set an end time.', 'error'); return;
+  }
+  const startMins = toMinutes(startTime);
+  const endMins   = toMinutes(endTime);
+  if (endMins <= startMins) {
+    toast('End time must be after start time.', 'error'); return;
+  }
+  if (startMins < 8 * 60) {
+    toast('Bookings cannot start before 8:00 AM.', 'error'); return;
+  }
+  if (endMins > 22 * 60) {
+    toast('Bookings cannot end after 10:00 PM.', 'error'); return;
+  }
+  if (headcount !== null) {
+    if (isNaN(headcount) || headcount < 1) {
+      toast('Number of attendees must be at least 1.', 'error'); return;
+    }
+    if (headcount > modalCapacity) {
+      toast(modalRoom + ' fits max ' + modalCapacity + ' people. Please choose a larger room.', 'error'); return;
+    }
+  }
 
   showLoading(true);
   closeModal();
 
   try {
-    // ── Step 1: Fetch freshest bookings for this room+date before submitting
-    //    Guards against race conditions where two users book simultaneously
+    // Fetch the freshest bookings for this room+date before writing,
+    // to catch a race condition where two users book simultaneously.
     let freshBookings = [];
     try {
-      const fr = await fetch(`${GAS_URL}?action=bookings&date=${date}`);
+      const fr = await fetch(GAS_URL + '?action=bookings&date=' + encodeURIComponent(date));
       const fd = await fr.json();
       freshBookings = (fd.ok ? fd.data : bookingsCache)
         .filter(b => b.roomName === modalRoom && !b.cancelled);
     } catch(_) {
-      freshBookings = bookingsCache.filter(b => b.roomName === modalRoom && !b.cancelled);
+      freshBookings = bookingsCache.filter(b => b.roomName === modalRoom);
     }
 
-    // ── Step 2: Client-side overlap check on fresh data
-    const newStart = toMinutes(startTime);
-    const newEnd   = toMinutes(endTime);
     const conflict = freshBookings.find(b => {
       const bStart = toMinutes(b.startTime);
       const bEnd   = toMinutes(b.endTime);
-      return newStart < bEnd && newEnd > bStart;
+      return bStart !== -1 && bEnd !== -1 && startMins < bEnd && endMins > bStart;
     });
     if (conflict) {
       const who = conflict.bookedByName || conflict.bookedBy.split('@')[0];
-      toast(`Slot taken: ${modalRoom} already booked ${formatTime(conflict.startTime)}–${formatTime(conflict.endTime)} by ${who}`, 'error');
-      await loadDay(date); // refresh grid so the conflict is visible
+      toast('Slot taken: ' + modalRoom + ' already booked '
+        + formatTime(conflict.startTime) + '–' + formatTime(conflict.endTime)
+        + ' by ' + who, 'error');
+      await loadDay(date);
       showLoading(false);
       return;
     }
 
-    // ── Step 3: Send to GAS (server also re-checks for safety)
-    const data = await gasGet({
-      action:      'book',
-      roomName:    modalRoom,
+    // Send to GAS (backend also re-validates everything)
+    const params = {
+      action: 'book', roomName: modalRoom,
       date, startTime, endTime, purpose,
-      bookedBy:    currentUser.email,
-      bookedByName: currentUser.name,
-    });
+      bookedBy: currentUser.email, bookedByName: currentUser.name,
+    };
+    if (headcount !== null) params.headcount = headcount;
+
+    const data = await gasGet(params);
     if (data.ok) {
-      toast(`Booked! ${modalRoom} ${formatTime(startTime)}–${formatTime(endTime)}`, 'success');
-      await loadDay(date);
+      toast('Booked! ' + modalRoom + ' ' + formatTime(startTime) + '–' + formatTime(endTime), 'success');
     } else {
       toast(data.error || 'Booking failed.', 'error');
-      await loadDay(date); // refresh regardless so UI reflects true state
     }
-  } catch(e) {
-    toast('Booking failed: ' + e.message, 'error');
+    await loadDay(date);
+  } catch(err) {
+    toast('Booking failed: ' + err.message, 'error');
   }
   showLoading(false);
 }
 
-async function cancelBooking(bookingId, roomName) {
-  if (!confirm(`Cancel this booking for ${roomName}?`)) return;
+// ── Cancel booking ────────────────────────────────────────────
+async function doCancelBooking(bookingId, roomName) {
+  if (!confirm('Cancel this booking for ' + roomName + '?')) return;
   showLoading(true);
   try {
-    const data = await gasGet({
-      action: 'cancel', bookingId, requestedBy: currentUser.email
-    });
+    const data = await gasGet({ action: 'cancel', bookingId, requestedBy: currentUser.email });
     if (data.ok) {
       toast('Booking cancelled.', 'success');
-      await loadDay($('date-picker').value);
     } else {
       toast(data.error || 'Could not cancel.', 'error');
     }
-  } catch(e) {
-    toast('Cancel failed: ' + e.message, 'error');
+    await loadDay($('date-picker').value);
+  } catch(err) {
+    toast('Cancel failed: ' + err.message, 'error');
   }
   showLoading(false);
 }
