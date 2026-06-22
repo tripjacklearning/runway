@@ -257,13 +257,14 @@
     <div class="form-row time-row">
       <div>
         <label>Start time</label>
-        <input type="time" id="modal-start" step="900" />
+        <input type="text" id="modal-start" placeholder="09:00" maxlength="5" />
       </div>
       <div>
         <label>End time</label>
-        <input type="time" id="modal-end" step="900" />
+        <input type="text" id="modal-end" placeholder="10:00" maxlength="5" />
       </div>
     </div>
+    <p style="font-size:11px;color:var(--muted);margin:-6px 0 10px;">Use 24-hour format &mdash; e.g. 09:00, 14:30</p>
     <div class="form-row">
       <label>Purpose / Meeting name</label>
       <input type="text" id="modal-purpose" placeholder="e.g. Team standup, Client call…" />
@@ -308,6 +309,7 @@ const ROOMS = [
 // ── State ────────────────────────────────────────────────────
 let currentUser    = null;   // { email, name, picture }
 let canBook        = false;
+let isAdmin        = false;  // true only for reception@tripjack.com / Settings sheet
 let activeFloor    = "all";
 let bookingsCache  = [];
 let modalRoom      = "";
@@ -392,8 +394,10 @@ async function onSignedIn() {
     const r    = await fetch(GAS_URL + '?action=checkAccess&email=' + encodeURIComponent(currentUser.email));
     const data = await r.json();
     canBook = data.data?.allowed || false;
+    isAdmin = data.data?.isAdmin  || false;
   } catch(_) {
     canBook = false;
+    isAdmin = false;
   }
   showLoading(false);
 
@@ -404,7 +408,7 @@ async function onSignedIn() {
 }
 
 function signOut() {
-  currentUser = null; canBook = false;
+  currentUser = null; canBook = false; isAdmin = false;
   $('user-pill').style.display  = 'none';
   $('app').style.display        = 'none';
   $('auth-screen').style.display = 'flex';
@@ -525,7 +529,7 @@ function buildRoomCard(room) {
         row.appendChild(whoSpan);
 
         // Cancel button: show to booking owner OR any authorised booker (admin)
-        if (isMine || canBook) {
+        if (isMine || isAdmin) {
           const btn = document.createElement('button');
           btn.className   = 'btn-cancel';
           btn.textContent = 'Cancel';
@@ -575,17 +579,50 @@ $('modal-overlay').addEventListener('click', e => {
   if (e.target === $('modal-overlay')) closeModal();
 });
 
-// Auto-correct end time when start time changes
-$('modal-start').addEventListener('change', function() {
+// Normalise a time text input to HH:MM on blur
+function normaliseTimeInput(el) {
+  const raw = el.value.trim();
+  if (!raw) return;
+  // Accept "9", "9:0", "09:00", "930", "9:30" etc.
+  let h, m;
+  if (/^\d{3,4}$/.test(raw)) {          // e.g. "930" or "1430"
+    h = parseInt(raw.slice(0, raw.length - 2), 10);
+    m = parseInt(raw.slice(-2), 10);
+  } else {
+    const parts = raw.split(':');
+    h = parseInt(parts[0], 10);
+    m = parseInt(parts[1] || '0', 10);
+  }
+  if (!isNaN(h) && !isNaN(m) && h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+    el.value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+}
+
+// When start time is set, auto-advance end time if end <= start
+$('modal-start').addEventListener('blur', function() {
+  normaliseTimeInput(this);
   const startMins = toMinutes(this.value);
   if (startMins === -1) return;
   const endMins = toMinutes($('modal-end').value);
-  // If end is not set, or end <= start, bump end to start + 1 hour (cap at 22:00)
   if (endMins === -1 || endMins <= startMins) {
     const newEnd = Math.min(startMins + 60, 22 * 60);
     $('modal-end').value =
       String(Math.floor(newEnd / 60)).padStart(2, '0') + ':' +
       String(newEnd % 60).padStart(2, '0');
+    $('modal-end').style.borderColor = '';
+  }
+});
+
+// When end time is set, validate it's after start — flag immediately, don't silently correct
+$('modal-end').addEventListener('blur', function() {
+  normaliseTimeInput(this);
+  const startMins = toMinutes($('modal-start').value);
+  const endMins   = toMinutes(this.value);
+  if (startMins !== -1 && endMins !== -1 && endMins <= startMins) {
+    this.style.borderColor = 'var(--danger)';
+    toast('End time must be after start time.', 'error');
+  } else {
+    this.style.borderColor = '';
   }
 });
 
